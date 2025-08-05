@@ -32,7 +32,7 @@ class FileDownloader:
         
         return new_path
     
-    def download_file(self, remote_path, item_name):
+    def download_file(self, remote_path, item_name, file_size=None):
         try:
             safe_name = self.sanitize_filename(item_name)
             local_path = self.download_dir / safe_name
@@ -44,12 +44,18 @@ class FileDownloader:
             print(f"{Fore.CYAN}Скачивание: {item_name}{Style.RESET_ALL}")
             print(f"{Fore.CYAN}Сохранение в: {local_path}{Style.RESET_ALL}")
             
-            self.client.download_file(remote_path, str(local_path))
+            # Если размер файла известен, используем скачивание с прогрессом
+            if file_size and file_size > 0:
+                success = self.client.download_file_with_progress(remote_path, str(local_path), file_size)
+            else:
+                success = self.client.download_file(remote_path, str(local_path))
             
-            file_size = local_path.stat().st_size
-            print(f"{Fore.GREEN}✓ Скачано успешно! Размер: {self.format_size(file_size)}{Style.RESET_ALL}")
-            
-            return True
+            if success:
+                actual_size = local_path.stat().st_size
+                print(f"{Fore.GREEN}✓ Скачано успешно! Размер: {self.format_size(actual_size)}{Style.RESET_ALL}")
+                return True
+            else:
+                return False
             
         except Exception as e:
             print(f"{Fore.RED}✗ Ошибка при скачивании: {e}{Style.RESET_ALL}")
@@ -68,10 +74,10 @@ class FileDownloader:
         
         print(f"\n{Fore.CYAN}Начинаю скачивание {len(files_to_download)} файлов...{Style.RESET_ALL}\n")
         
-        for i, (remote_path, item_name) in enumerate(files_to_download, 1):
+        for i, (remote_path, item_name, file_size) in enumerate(files_to_download, 1):
             print(f"{Fore.BLUE}[{i}/{len(files_to_download)}]{Style.RESET_ALL}")
             
-            if self.download_file(remote_path, item_name):
+            if self.download_file(remote_path, item_name, file_size):
                 successful += 1
             else:
                 failed += 1

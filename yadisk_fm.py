@@ -51,7 +51,7 @@ def main():
                     else:
                         print(f"\n{Fore.YELLOW}Скачать файл '{item.name}'? (y/n): {Style.RESET_ALL}", end='')
                         if input().strip().lower() == 'y':
-                            downloader.download_file(item.path, item.name)
+                            downloader.download_file(item.path, item.name, item.size)
                             input(f"\n{Fore.CYAN}Нажмите Enter для продолжения...{Style.RESET_ALL}")
                 else:
                     print(f"{Fore.RED}Неверный номер элемента{Style.RESET_ALL}")
@@ -82,7 +82,7 @@ def main():
                 if choice == 'all':
                     for item in sorted_items:
                         if item.type == 'file':
-                            files_to_download.append((item.path, item.name))
+                            files_to_download.append((item.path, item.name, item.size))
                 else:
                     try:
                         selected_numbers = []
@@ -105,7 +105,7 @@ def main():
                         for num in selected_numbers:
                             item = interface.get_item_by_number(sorted_items, num)
                             if item and item.type == 'file':
-                                files_to_download.append((item.path, item.name))
+                                files_to_download.append((item.path, item.name, item.size))
                             elif item and item.type == 'dir':
                                 print(f"{Fore.YELLOW}Пропускаю папку: {item.name}{Style.RESET_ALL}")
                             elif not item:
